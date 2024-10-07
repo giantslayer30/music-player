@@ -1,0 +1,144 @@
+<body>
+    <iframe id="playlist" src="https://youtube.com/playlist?list=PL0IYpdlafdv3jCSzpO5oqy92ynNHe_9oM&si=siL1lNtyitHlDz6y" frameborder="0"></iframe>
+ 
+    <div class="buttons">
+        <svg class=button id=BACKWARD fill="#333333" width="48px" height="48px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <path d="M347.6 528.95l383.2 301.02c14.25 11.2 35.2 1.1 35.2-16.95V210.97c0-18.05-20.95-28.14-35.2-16.94L347.6 495.05a21.53 21.53 0 0 0 0 33.9M330 864h-64a8 8 0 0 1-8-8V168a8 8 0 0 1 8-8h64a8 8 0 0 1 8 8v688a8 8 0 0 1-8 8" />
+        </svg>
+ 
+        <svg class=button id="PLAY" fill="#333333" width="48px" height="48px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" class="icon">
+            <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm144.1 454.9L437.7 677.8a8.02 8.02 0 0 1-12.7-6.5V353.7a8 8 0 0 1 12.7-6.5L656.1 506a7.9 7.9 0 0 1 0 12.9z" />
+        </svg>
+ 
+        <svg class=button id=PAUSE fill="#333333" width="48px" height="48px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" class="icon">
+            <path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm-80 600c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V360c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v304zm224 0c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8V360c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v304z" />
+        </svg>
+ 
+        <svg class=button id=FORWARD fill="#333333" width="48px" height="48px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <path d="M676.4 528.95L293.2 829.97c-14.25 11.2-35.2 1.1-35.2-16.95V210.97c0-18.05 20.95-28.14 35.2-16.94l383.2 301.02a21.53 21.53 0 0 1 0 33.9M694 864h64a8 8 0 0 0 8-8V168a8 8 0 0 0-8-8h-64a8 8 0 0 0-8 8v688a8 8 0 0 0 8 8" />
+        </svg>
+    </div>
+ 
+    <!-- Song Title Display -->
+    <div id="song-title" style="font-size: 20px; margin-top: 10px; text-align: center;"></div>
+ 
+    <!-- Volume and Seekbar controls -->
+    <div class="slidecontainer" id="VOLUME">
+        <input type="range" min="0" max="100" value="50" class="slider" id="volume-range">
+    </div>
+ 
+    <div class="slidecontainer" id="SEEKBAR">
+        <input type="range" min="0" max="100" value="0" class="slider" id="seek-bar">
+    </div>
+</body>
+/* Layout */
+body {
+    display: flex;
+    flex-flow: column wrap;
+    align-content: space-around;
+    justify-content: center;
+}
+
+/* Buttons */
+.button {
+    width: 48px;
+    height: 48px;
+    opacity: 1;
+    transition: opacity .5s;
+}
+
+.button:hover {
+    opacity: 0.5;
+}
+
+/* Hide the video player */
+#playlist {
+    display: none;
+}
+
+/* Volume and Seek Slider */
+.slider {
+    -webkit-appearance: none;
+    margin-left: 35px;
+    border-radius: 20px;
+    background-color: #333333;
+    height: 5px;
+    opacity: 1;
+    transition: opacity .5s;
+}
+
+.slider:hover {
+    opacity: 0.5;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 25px;
+    height: 25px;
+    border: 10px double #333333;
+    border-radius: 50%;
+    background: #ffffff;
+}
+var player;
+
+function onYouTubePlayerAPIReady() {
+    player = new YT.Player("playlist", {
+        events: {
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    // Binding play button
+    document.getElementById("PLAY").addEventListener("click", function() {
+        player.playVideo();
+    });
+
+    // Binding pause button
+    document.getElementById("PAUSE").addEventListener("click", function() {
+        player.pauseVideo();
+    });
+
+    // Binding backward button
+    document.getElementById("BACKWARD").addEventListener("click", function() {
+        player.previousVideo();
+    });
+
+    // Binding forward button
+    document.getElementById("FORWARD").addEventListener("click", function() {
+        player.nextVideo();
+    });
+
+    // Volume control
+    document.getElementById("volume-range").addEventListener("change", function() {
+        player.setVolume(this.value);
+    });
+
+    // Seekbar control
+    document.getElementById("seek-bar").addEventListener("input", function() {
+        var seekToTime = player.getDuration() * (this.value / 100);
+        player.seekTo(seekToTime, true);
+    });
+
+    // Updating seekbar
+    setInterval(function() {
+        var currentTime = player.getCurrentTime();
+        var duration = player.getDuration();
+        document.getElementById("seek-bar").value = (currentTime / duration) * 100;
+    }, 1000);
+}
+
+function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.PLAYING) {
+        // Update the song title when a new song is playing
+        document.getElementById("song-title").innerHTML = player.getVideoData().title;
+    }
+}
+
+// Load the YouTube IFrame API
+var tag = document.createElement("script");
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName("script")[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
